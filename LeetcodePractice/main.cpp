@@ -6,6 +6,7 @@
 #include <list>
 #include <queue>
 #include <unordered_set>
+#include <stack>
 
 using namespace std;
 
@@ -18,53 +19,50 @@ struct TreeNode {
     TreeNode(int x) : val(x), left(NULL), right(NULL) { }
 };
 
-class Codec {
+
+struct UndirectedGraphNode {
+    int label;
+    vector<UndirectedGraphNode *> neighbors;
+
+    UndirectedGraphNode(int x) : label(x) { };
+};
+
+class Solution {
 public:
-
-    // Encodes a tree to a single string.
-    string serialize(TreeNode *root) {
-        stringstream ss;
-        return ss.str();
+    int findKthLargest(vector<int>& nums, int k) {
+        return quickSelection(nums, 0, (int)nums.size() - 1, k);
     }
-
-    // Decodes your encoded data to tree.
-    TreeNode *deserialize(string data) {
-        stringstream ss(data);
-        return deserializeHelper(ss);
-    }
-
 private:
-    void serializeHelper(TreeNode *current, stringstream &ss) {
-        if (current == nullptr) {
-            ss << "# ";
-            return;
+    int quickSelection(vector<int>& nums, int start, int end, int k) {
+        if (end == start) {
+            return nums[start];
         }
-        ss << current->val << " ";
-        serializeHelper(current->left, ss);
-        serializeHelper(current->right, ss);
-    }
-
-    TreeNode *deserializeHelper(stringstream &ss) {
-        string val;
-        ss >> val;
-        if (val == "#") {
-            return nullptr;
+        int pivot = partition(nums, start, end);
+        int order = pivot - start + 1;
+        if (order == k) {
+            return nums[order];
+        } else if (order < k) {
+            return quickSelection(nums, pivot + 1, end, k - order);
         } else {
-            TreeNode *current = new TreeNode(stoi(val));
-            current->left = deserializeHelper(ss);
-            current->right = deserializeHelper(ss);
-            return current;
+            return quickSelection(nums, start, pivot - 1, k);
         }
+    }
+    int partition(vector<int>& nums, int start, int end) {
+        int val = nums[end];
+        int i = start - 1;
+        for (int j = start; j < end; ++j) {
+            if (nums[j] >= val) {
+                swap(nums[++i], nums[j]);
+            }
+        }
+        swap(nums[i + 1], nums[end]);
+        return i + 1;
     }
 };
 
-// Your Codec object will be instantiated and called as such:
-// Codec codec;
-// codec.deserialize(codec.serialize(root));
-
 int main() {
-    Codec a;
-    string temp = a.serialize(nullptr);
-    TreeNode* root = a.deserialize(temp);
+    Solution a;
+    vector<int> nums{2, 1};
+    cout << a.findKthLargest(nums, 2);
     return 0;
 }
