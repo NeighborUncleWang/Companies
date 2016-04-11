@@ -106,6 +106,41 @@ public:
 };
 
 
+class Solution2 {
+    string serializeTree(TreeNode* root) {
+        if (root == nullptr) return "";
+        string result = string{root->val} + " ";
+        for (TreeNode* child : root->children) {
+            result += serializeTree(child);
+        }
+        result += "# ";
+        return result;
+    }
+    TreeNode* deserialize(string& s) {
+        stringstream  ss(s);
+        return helper(ss);
+    }
+    TreeNode* helper(stringstream& ss) {
+        char val;
+        ss >> val;
+        if (val == '#') {
+            return nullptr;
+        }
+        TreeNode* current = new TreeNode(val);
+        while (true) {
+            TreeNode* child = helper(ss);
+            if (child != nullptr) {
+                current->children.push_back(child);
+            } else {
+                break;
+            }
+        }
+        return current;
+    }
+};
+
+
+
 int main() {
     Solution a;
     auto root = a.BuildTree();
