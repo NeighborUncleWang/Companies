@@ -107,49 +107,52 @@ public:
 
 
 class Solution2 {
-    string serializeTree(TreeNode* root) {
-        if (root == nullptr) return "";
-        string result = string{root->val} + " ";
-        for (TreeNode* child : root->children) {
-            result += serializeTree(child);
+public:
+    void seHelper(TreeNode* cur, stringstream& ss) {
+        if (cur == nullptr) return;
+        ss << cur->val << " ";
+        for (auto child : cur->children) {
+            seHelper(child, ss);
         }
-        result += "# ";
-        return result;
+        ss << "# ";
+    }
+    string serializeTree(TreeNode* root) {
+        stringstream ss;
+        seHelper(root, ss);
+        return ss.str();
     }
     TreeNode* deserialize(string& s) {
+        if (s.empty()) return nullptr;
         stringstream  ss(s);
-        return helper(ss);
+        return deHelper(ss);
     }
-    TreeNode* helper(stringstream& ss) {
+    TreeNode* deHelper(stringstream& ss) {
         char val;
         ss >> val;
-        if (val == '#') {
-            return nullptr;
+        if (val == '#') return nullptr;
+        TreeNode* cur = new TreeNode(val);
+        TreeNode* child;
+        while (child = deHelper(ss)) {
+            cur->children.push_back(child);
         }
-        TreeNode* current = new TreeNode(val);
-        while (true) {
-            TreeNode* child = helper(ss);
-            if (child != nullptr) {
-                current->children.push_back(child);
-            } else {
-                break;
-            }
-        }
-        return current;
+        return cur;
     }
 };
 
 
 
 int main() {
+    Solution2 b;
     Solution a;
     auto root = a.BuildTree();
     a.printTree(root);
-    string tree = a.SerializeNaryTree(root);
+//    string tree = a.SerializeNaryTree(root);
+    string tree = b.serializeTree(root);
     cout << tree << endl;
-    auto root2 = a.DeserializeNaryTree(tree);
-//    a.printTree(root2);
-    auto root3 = a.iterativeDeserializeTree(tree);
-    a.printTree(root3);
+//    auto root2 = a.DeserializeNaryTree(tree);
+    auto root2 = b.deserialize(tree);
+    a.printTree(root2);
+//    auto root3 = a.iterativeDeserializeTree(tree);
+//    a.printTree(root3);
     return 0;
 }
